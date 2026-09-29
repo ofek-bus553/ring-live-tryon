@@ -1,0 +1,37 @@
+name: Publish ring try-on
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch hand tracking dependencies into site
+        run: |
+          mkdir -p site/vendor/wasm
+          cp index.html site/index.html
+          curl -fL --retry 3 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/vision_bundle.mjs' -o site/vendor/vision_bundle.mjs
+          curl -fL --retry 3 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm/vision_wasm_internal.js' -o site/vendor/wasm/vision_wasm_internal.js
+          curl -fL --retry 3 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm/vision_wasm_internal.wasm' -o site/vendor/wasm/vision_wasm_internal.wasm
+          curl -fL --retry 3 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm/vision_wasm_nosimd_internal.js' -o site/vendor/wasm/vision_wasm_nosimd_internal.js
+          curl -fL --retry 3 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm/vision_wasm_nosimd_internal.wasm' -o site/vendor/wasm/vision_wasm_nosimd_internal.wasm
+          curl -fL --retry 3 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task' -o site/vendor/hand_landmarker.task
+          test $(wc -c < site/vendor/hand_landmarker.task) -gt 7000000
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
