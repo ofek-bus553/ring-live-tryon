@@ -33,7 +33,7 @@ function loop(){if(!active||!tracker)return;requestAnimationFrame(loop);if(camer
  const fx=p.x+(q.x-p.x)*.32,fy=p.y+(q.y-p.y)*.32,dx=q.x-p.x,dy=q.y-p.y;
  // Width estimated from spacing of adjacent knuckles; user slider adjusts visual fit.
  const knuckle=dist(p,n)*Math.min(w,h), bandWidth=Math.max(50,Math.min(330,knuckle*1.75))*Number($('#size').value)/100;
- const angle=Math.atan2(dy,dx)-Math.PI/2;
+ const angle=Math.atan2(dy,dx)+Math.PI/2;
  const target={x:fx*w,y:fy*h,width:bandWidth,angle};
  if(!smoothed)smoothed=target;else{let da=((angle-smoothed.angle+Math.PI*3)%(Math.PI*2))-Math.PI;smoothed={x:smoothed.x*.62+target.x*.38,y:smoothed.y*.62+target.y*.38,width:smoothed.width*.68+target.width*.32,angle:smoothed.angle+da*.35}}
  const img=pics[current];if(!img.complete||!img.naturalWidth)return;
